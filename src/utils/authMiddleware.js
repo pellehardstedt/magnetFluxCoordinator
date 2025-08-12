@@ -4,4 +4,4 @@ function requireAuth(req, res, next) {
   res.status(401).json({ success: false, message: 'Unauthorized' });
 }
 
-module.exports = { requireAuth };
+export { requireAuth };

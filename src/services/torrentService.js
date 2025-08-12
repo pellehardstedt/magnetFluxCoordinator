@@ -1,12 +1,12 @@
-// filepath: services/torrentService.js
-const WebTorrent = require('webtorrent');
-const path = require('path');
-const EventEmitter = require('events');
+import WebTorrent from 'webtorrent';
+import path from 'path';
+import { EventEmitter } from 'events';
+
 const client = new WebTorrent();
 const downloads = [];
 const emitter = new EventEmitter();
 
-const DOWNLOAD_PATH = process.env.DOWNLOAD_PATH || path.join(__dirname, '..', 'downloads');
+const DOWNLOAD_PATH = process.env.DOWNLOAD_PATH || path.join(process.cwd(), 'downloads');
 
 function addTorrent(torrentId) {
   return new Promise((resolve, reject) => {
@@ -33,7 +33,7 @@ function listTorrents() {
   }));
 }
 
-module.exports = {
+export default {
   addTorrent,
   listTorrents,
   emitter,

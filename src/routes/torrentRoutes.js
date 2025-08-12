@@ -1,7 +1,10 @@
-const express = require('express');
-const router = express.Router();
-const torrentController = require('../controllers/torrentController');
-const { requireAuth } = require('../utils/authMiddleware');
+import express from 'express';
+import { addTorrent, listTorrents } from '../controllers/torrentController.js';
+import { requireAuth } from '../utils/authMiddleware.js';
 
-router.post('/add', requireAuth, torrentController.addTorrent);
-router.get('/list', requireAuth, torrentController.listTorrents);
+const router = express.Router();
+
+router.post('/add', requireAuth, addTorrent);
+router.get('/list', requireAuth, listTorrents);
+
+export default router;

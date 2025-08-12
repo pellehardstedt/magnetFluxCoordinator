@@ -1,7 +1,7 @@
-exports.moveFile = (source, destination) => {
-    const fs = require('fs');
-    const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
+export function moveFile(source, destination) {
     const fileName = path.basename(source);
     const destPath = path.join(destination, fileName);
 
@@ -12,4 +12,4 @@ exports.moveFile = (source, destination) => {
         }
         console.log(`File moved from ${source} to ${destPath}`);
     });
-};
+}

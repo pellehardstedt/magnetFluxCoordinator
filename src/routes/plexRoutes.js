@@ -1,9 +1,9 @@
-// filepath: routes/plexRoutes.js
-const express = require('express');
+import express from 'express';
+import { scanLibrary } from '../controllers/plexController.js';
+import { requireAuth } from '../utils/authMiddleware.js';
+
 const router = express.Router();
-const plexController = require('../controllers/plexController');
-const { requireAuth } = require('../utils/authMiddleware');
 
-router.post('/scan', requireAuth, plexController.scanLibrary);
+router.post('/scan', requireAuth, scanLibrary);
 
-module.exports = router;
+export default router;

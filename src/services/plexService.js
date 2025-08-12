@@ -1,7 +1,6 @@
-// filepath: services/plexService.js
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 
 const PLEX_TOKEN = process.env.PLEX_TOKEN;
 const PLEX_HOST = process.env.PLEX_HOST || 'localhost';
@@ -20,4 +19,4 @@ function moveToPlex(filePath) {
   return dest;
 }
 
-module.exports = { triggerScan, moveToPlex };
+export default { triggerScan, moveToPlex };

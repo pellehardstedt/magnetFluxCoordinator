@@ -1,10 +1,17 @@
-require('dotenv').config();
-const express = require('express');
-const session = require('express-session');
-const path = require('path');
-const torrentRoutes = require('./routes/torrentRoutes');
-const plexRoutes = require('./routes/plexRoutes');
-const authRoutes = require('./routes/authRoutes');
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
+import session from 'express-session';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import torrentRoutes from './routes/torrentRoutes.js';
+import plexRoutes from './routes/plexRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;

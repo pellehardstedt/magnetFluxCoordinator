@@ -1,8 +1,7 @@
-// filepath: controllers/torrentController.js
-const torrentService = require('../services/torrentService');
-const urlExtractor = require('../utils/urlExtractor');
+import torrentService from '../services/torrentService.js';
+import urlExtractor from '../utils/urlExtractor.js';
 
-exports.addTorrent = async (req, res) => {
+export async function addTorrent(req, res) {
   const { url } = req.body;
   try {
     const torrentUrl = await urlExtractor.extract(url);
@@ -11,8 +10,8 @@ exports.addTorrent = async (req, res) => {
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
-};
+}
 
-exports.listTorrents = (req, res) => {
+export function listTorrents(req, res) {
   res.json({ torrents: torrentService.listTorrents() });
-};
+}
