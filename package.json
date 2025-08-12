@@ -1,0 +1,26 @@
+{
+  "name": "torrent-downloader-app",
+  "version": "1.0.0",
+  "description": "A web application to download torrents and transfer them to a Plex library.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "dotenv": "^10.0.0",
+    "axios": "^0.21.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "keywords": [
+    "torrent",
+    "plex",
+    "downloader",
+    "web"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
