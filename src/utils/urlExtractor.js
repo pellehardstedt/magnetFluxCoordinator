@@ -1,5 +1,5 @@
+import * as cheerio from 'cheerio';
 import axios from 'axios';
-import cheerio from 'cheerio';
 
 async function extract(url) {
   // If it's a magnet link or .torrent file, return as is
@@ -16,4 +16,4 @@ async function extract(url) {
   throw new Error('No magnet or torrent link found on page');
 }
 
-export { extract };
+export default { extract };
