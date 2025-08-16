@@ -13,10 +13,19 @@ async function triggerScan() {
   await axios.get(url);
 }
 
-function moveToPlex(filePath) {
-  const dest = path.join(PLEX_LIBRARY_PATH, path.basename(filePath));
-  fs.renameSync(filePath, dest);
-  return dest;
+function moveToPlex(torrent, type) {
+  const destDir = getDestinationPath(torrent, type);
+  if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+  torrent.files.forEach(file => {
+    if (isMediaOrSubtitle(file.name)) {
+      const src = file.path; // Use absolute path from WebTorrent
+      const dest = path.join(destDir, file.name);
+      fs.renameSync(src, dest);
+      console.log(`Moved ${src} to ${dest}`);
+    } else {
+      console.log(`Skipped non-media file: ${file.name}`);
+    }
+  });
 }
 
 export default { triggerScan, moveToPlex };

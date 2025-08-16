@@ -5,6 +5,7 @@ import express from 'express';
 import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cors from 'cors';
 
 import torrentRoutes from './routes/torrentRoutes.js';
 import plexRoutes from './routes/plexRoutes.js';
@@ -16,6 +17,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
