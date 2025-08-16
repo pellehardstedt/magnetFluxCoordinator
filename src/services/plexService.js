@@ -35,10 +35,11 @@ function moveToPlex(torrent, type) {
   if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
   torrent.files.forEach(file => {
     if (isMediaOrSubtitle(file.name)) {
-      const src = file.path; // Use absolute path from WebTorrent
       const dest = path.join(destDir, file.name);
-      fs.renameSync(src, dest);
-      console.log(`Moved ${src} to ${dest}`);
+      // Ensure parent directory exists
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.renameSync(file.path, dest);
+      console.log(`Moved ${file.path} to ${dest}`);
     } else {
       console.log(`Skipped non-media file: ${file.name}`);
     }
