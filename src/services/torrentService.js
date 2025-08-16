@@ -106,11 +106,33 @@ function isMediaOrSubtitle(filename) {
 
 function moveToPlex(torrent, type) {
   const destDir = getDestinationPath(torrent, type);
-  if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+
+  // Determine if this is a single-file torrent
+  const isSingleFile = torrent.files.length === 1;
+
+  // Use sanitized folder name for single-file torrents
+  const folderName = sanitizeFolderName(torrent.name);
+
+  // Final destination for this torrent
+  const finalDestDir = isSingleFile
+    ? path.join(destDir, folderName)
+    : destDir;
+
+  if (!fs.existsSync(finalDestDir)) fs.mkdirSync(finalDestDir, { recursive: true });
+
   torrent.files.forEach(file => {
     if (isMediaOrSubtitle(file.name)) {
-      const dest = path.join(destDir, file.name);
-      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      let dest;
+      if (isSingleFile) {
+        // For single file, move into its own folder
+        dest = path.join(finalDestDir, file.name);
+      } else {
+        // For multi-file, preserve relative structure but do not nest further
+        const relativePath = path.relative(DOWNLOAD_PATH, file.path);
+        dest = path.join(finalDestDir, relativePath);
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+      }
+
       if (fs.existsSync(file.path)) {
         fs.renameSync(file.path, dest);
         console.log(`Moved ${file.path} to ${dest}`);
@@ -226,6 +248,14 @@ function listTorrents() {
 
 // On server startup, resume torrents and cleanup downloads
 loadPersistedTorrents();
+
+function sanitizeFolderName(name) {
+  return name
+    .replace(/[._]+/g, ' ')
+    .replace(/[\[\]\(\)\{\}]/g, '')
+    .replace(/[^a-zA-Z0-9\s\-]/g, '') // keep alphanumeric, space, dash
+    .trim();
+}
 
 export default {
   addTorrent,
