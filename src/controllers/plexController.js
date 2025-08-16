@@ -1,4 +1,6 @@
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 
 const PLEX_TOKEN = process.env.PLEX_TOKEN;
 const PLEX_HOST = process.env.PLEX_HOST || 'localhost';
@@ -39,4 +41,19 @@ export async function getRecentlyAdded(req, res) {
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+}
+
+function moveToPlex(torrent, type) {
+  const destDir = getDestinationPath(torrent, type);
+  if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+  torrent.files.forEach(file => {
+    if (isMediaOrSubtitle(file.name)) {
+      const src = file.path; // This should be the absolute path
+      const dest = path.join(destDir, file.name);
+      fs.renameSync(src, dest);
+      console.log(`Moved ${src} to ${dest}`);
+    } else {
+      console.log(`Skipped non-media file: ${file.name}`);
+    }
+  });
 }
