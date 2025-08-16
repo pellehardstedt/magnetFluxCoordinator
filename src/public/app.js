@@ -5,9 +5,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const scanPlex = document.getElementById('scanPlex');
   const logView = document.getElementById('logView');
   const clearLogBtn = document.getElementById('clearLog');
+  const toggleThemeBtn = document.getElementById('toggleTheme');
+  const body = document.body;
 
   // Always show the main app
   main.style.display = '';
+
+  // Theme toggle
+  toggleThemeBtn.addEventListener('click', () => {
+    if (body.classList.contains('dark-mode')) {
+      body.classList.remove('dark-mode');
+      body.classList.add('light-mode');
+    } else {
+      body.classList.remove('light-mode');
+      body.classList.add('dark-mode');
+    }
+  });
 
   function addLog(message, type = 'info') {
     const entry = document.createElement('div');

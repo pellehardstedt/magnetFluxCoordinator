@@ -6,6 +6,15 @@ body {
   padding: 0;
 }
 
+body.dark-mode {
+  background: #181818;
+  color: #f1f1f1;
+}
+body.light-mode {
+  background: #f9f9f9;
+  color: #181818;
+}
+
 .container {
   max-width: 700px;
   margin: 40px auto;
@@ -46,6 +55,17 @@ input[type="password"] {
   background: #f7fafc;
 }
 
+body.dark-mode input[type="text"] {
+  background: #222;
+  color: #fff;
+  border: 1px solid #444;
+}
+body.light-mode input[type="text"] {
+  background: #fff;
+  color: #222;
+  border: 1px solid #ccc;
+}
+
 button, input[type="submit"] {
   background: #205080;
   color: #fff;
@@ -63,6 +83,17 @@ button:hover, input[type="submit"]:hover {
 
 #main {
   padding: 16px 0;
+}
+
+#main, #logView {
+  border-radius: 8px;
+}
+#main {
+  background: rgba(40,40,40,0.9);
+  padding: 1em;
+}
+body.light-mode #main {
+  background: #fff;
 }
 
 #torrentList {
@@ -84,21 +115,26 @@ button:hover, input[type="submit"]:hover {
   height: 200px;
   overflow-y: auto;
   border: 1px solid #b6c6da;
-  background: #f9f9f9;
+  background: #222;
+  color: #eee;
   padding: 8px;
   margin-bottom: 1em;
   font-size: 0.98em;
   border-radius: 6px;
+}
+body.light-mode #logView {
+  background: #f1f1f1;
+  color: #222;
 }
 
 .log-entry {
   font-family: monospace;
   padding: 2px 0;
 }
-.log-info { color: #2a4d7a; }
-.log-success { color: #228B22; }
-.log-error { color: #B22222; }
-.log-progress { color: #8B8B00; }
+.log-entry.log-error { color: #ff6b6b; }
+.log-entry.log-success { color: #51fa7b; }
+.log-entry.log-progress { color: #f1fa8c; }
+.log-entry.log-info { color: #8be9fd; }
 
 #clearLog {
   background: #e05e2f;
