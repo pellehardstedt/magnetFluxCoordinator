@@ -1,6 +1,9 @@
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 const PLEX_TOKEN = process.env.PLEX_TOKEN;
 const PLEX_HOST = process.env.PLEX_HOST || 'localhost';

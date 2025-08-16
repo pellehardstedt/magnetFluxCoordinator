@@ -3,6 +3,9 @@ import path from 'path';
 import { EventEmitter } from 'events';
 import fs from 'fs';
 import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 const client = new WebTorrent();
 const downloads = [];
