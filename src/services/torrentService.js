@@ -81,14 +81,14 @@ function getDestinationPath(torrent, type) {
   if (type === 'tv') {
     const info = parseTvInfo(torrent.name);
     if (info) {
-      // Example: /path/to/plex/tv/South Park/Season 27/
-      return path.join(process.env.PLEX_LIBRARY_PATH, 'tv', info.title, `Season ${info.season}`);
+      // Example: /plexmediaserver/Library/tvseries/South Park/Season 27/
+      return path.join(process.env.PLEX_LIBRARY_PATH, 'tvseries', info.title, `Season ${info.season}`);
     }
     // Fallback if parsing fails
-    return path.join(process.env.PLEX_LIBRARY_PATH, 'tv', torrent.name);
+    return path.join(process.env.PLEX_LIBRARY_PATH, 'tvseries', torrent.name);
   } else {
-    // Movie
-    return path.join(process.env.PLEX_LIBRARY_PATH, 'movies');
+    // Movie: /plexmediaserver/Library/video/
+    return path.join(process.env.PLEX_LIBRARY_PATH, 'video');
   }
 }
 
