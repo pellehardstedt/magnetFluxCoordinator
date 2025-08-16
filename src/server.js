@@ -42,3 +42,7 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+// Usage:
+// await plexService.triggerScan();
+// plexService.moveToPlex(torrent, type);
