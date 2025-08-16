@@ -106,10 +106,14 @@ function moveToPlex(torrent, type) {
   torrent.files.forEach(file => {
     if (isMediaOrSubtitle(file.name)) {
       const dest = path.join(destDir, file.name);
-      fs.renameSync(file.path, dest);
-      console.log(`Moved ${file.path} to ${dest}`);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      if (fs.existsSync(file.path)) {
+        fs.renameSync(file.path, dest);
+        console.log(`Moved ${file.path} to ${dest}`);
+      } else {
+        console.warn(`Source file does not exist, skipping: ${file.path}`);
+      }
     } else {
-      // Optionally, delete or ignore other files
       console.log(`Skipped non-media file: ${file.name}`);
     }
   });
