@@ -12,7 +12,7 @@ import torrentRoutes from './routes/torrentRoutes.js';
 import plexRoutes from './routes/plexRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import plexService from './services/plexService.js';
-import fileUtils from './utils/fileUtils.js';
+import { moveFile } from './utils/fileUtils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
