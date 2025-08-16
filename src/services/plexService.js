@@ -67,7 +67,8 @@ async function triggerScan() {
   ];
   await Promise.all(urls.map(url =>
     axios.get(url, {
-      headers: {
+      headers:
+      {
         'X-Plex-Client-Identifier': 'magnetFluxCoordinator'
       }
     })
@@ -77,13 +78,23 @@ async function triggerScan() {
 function moveToPlex(torrent, type) {
   const destDir = getDestinationPath(torrent, type);
   if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+
   torrent.files.forEach(file => {
     if (isMediaOrSubtitle(file.name)) {
+      // Ensure we use the absolute path for the source file
+      const src = path.isAbsolute(file.path)
+        ? file.path
+        : path.join(process.env.DOWNLOAD_PATH || path.join(process.cwd(), 'downloads'), file.path);
+
       const dest = path.join(destDir, file.name);
       fs.mkdirSync(path.dirname(dest), { recursive: true });
-      console.log('Checking file path:', file.path);
-      fs.renameSync(file.path, dest);
-      console.log(`Moved ${file.path} to ${dest}`);
+      console.log('Checking file path:', src);
+      if (fs.existsSync(src)) {
+        fs.renameSync(src, dest);
+        console.log(`Moved ${src} to ${dest}`);
+      } else {
+        console.warn(`Source file does not exist, skipping: ${src}`);
+      }
     } else {
       console.log(`Skipped non-media file: ${file.name}`);
     }

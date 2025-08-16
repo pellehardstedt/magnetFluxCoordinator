@@ -106,38 +106,23 @@ function isMediaOrSubtitle(filename) {
 
 function moveToPlex(torrent, type) {
   const destDir = getDestinationPath(torrent, type);
-
-  // Determine if this is a single-file torrent
-  const isSingleFile = torrent.files.length === 1;
-
-  // Use sanitized folder name for single-file torrents
-  const folderName = sanitizeFolderName(torrent.name);
-
-  // Final destination for this torrent
-  const finalDestDir = isSingleFile
-    ? path.join(destDir, folderName)
-    : destDir;
-
-  if (!fs.existsSync(finalDestDir)) fs.mkdirSync(finalDestDir, { recursive: true });
+  if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
 
   torrent.files.forEach(file => {
     if (isMediaOrSubtitle(file.name)) {
-      let dest;
-      if (isSingleFile) {
-        // For single file, move into its own folder
-        dest = path.join(finalDestDir, file.name);
-      } else {
-        // For multi-file, preserve relative structure but do not nest further
-        const relativePath = path.relative(DOWNLOAD_PATH, file.path);
-        dest = path.join(finalDestDir, relativePath);
-        fs.mkdirSync(path.dirname(dest), { recursive: true });
-      }
+      // Ensure we use the absolute path for the source file
+      const src = path.isAbsolute(file.path)
+        ? file.path
+        : path.join(process.env.DOWNLOAD_PATH || path.join(process.cwd(), 'downloads'), file.path);
 
-      if (fs.existsSync(file.path)) {
-        fs.renameSync(file.path, dest);
-        console.log(`Moved ${file.path} to ${dest}`);
+      const dest = path.join(destDir, file.name);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      console.log('Checking file path:', src);
+      if (fs.existsSync(src)) {
+        fs.renameSync(src, dest);
+        console.log(`Moved ${src} to ${dest}`);
       } else {
-        console.warn(`Source file does not exist, skipping: ${file.path}`);
+        console.warn(`Source file does not exist, skipping: ${src}`);
       }
     } else {
       console.log(`Skipped non-media file: ${file.name}`);
