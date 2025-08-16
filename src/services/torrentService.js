@@ -22,17 +22,20 @@ const speedHistoryMap = new Map(); // infoHash -> [{timestamp, speed}]
 
 // Load persisted torrents on startup
 function loadPersistedTorrents() {
-  let ids = [];
+  let items = [];
   if (fs.existsSync(TORRENTS_FILE)) {
-    ids = JSON.parse(fs.readFileSync(TORRENTS_FILE, 'utf-8'));
-    ids.forEach(id => addTorrent(id));
+    items = JSON.parse(fs.readFileSync(TORRENTS_FILE, 'utf-8'));
+    items.forEach(item => addTorrent(item.id, item.type));
   }
-  cleanupDownloadFolder(ids);
+  cleanupDownloadFolder(items.map(item => item.id));
 }
 
 // Save current torrent IDs to file
 function persistTorrents() {
-  const ids = downloads.map(t => t.magnetURI || t.torrentFile);
+  const ids = downloads.map(t => ({
+    id: t.magnetURI || t.torrentFile,
+    type: t.type || 'movie'
+  }));
   fs.writeFileSync(TORRENTS_FILE, JSON.stringify(ids, null, 2));
 }
 
@@ -189,12 +192,15 @@ function getAverageSpeed(infoHash) {
 function addTorrent(torrentId, type = 'movie') {
   return new Promise((resolve, reject) => {
     client.add(torrentId, { path: DOWNLOAD_PATH }, torrent => {
+      torrent.type = type; // Attach type for persistence
       downloads.push(torrent);
       persistTorrents();
       trackSpeed(torrent);
       torrent.on('done', () => {
-        moveToPlexAndScan(torrent, type);
-        emitter.emit('done', torrent);
+        setTimeout(() => {
+          moveToPlexAndScan(torrent, type);
+          emitter.emit('done', torrent);
+        }, 1000); // 1 second delay
       });
       resolve({
         name: torrent.name,
