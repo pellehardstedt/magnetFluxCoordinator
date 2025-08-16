@@ -81,6 +81,7 @@ function moveToPlex(torrent, type) {
     if (isMediaOrSubtitle(file.name)) {
       const dest = path.join(destDir, file.name);
       fs.mkdirSync(path.dirname(dest), { recursive: true });
+      console.log('Checking file path:', file.path);
       fs.renameSync(file.path, dest);
       console.log(`Moved ${file.path} to ${dest}`);
     } else {
