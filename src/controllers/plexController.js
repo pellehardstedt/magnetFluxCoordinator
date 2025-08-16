@@ -11,12 +11,13 @@ console.log('Using Plex token:', PLEX_TOKEN);
 // Scan both Movies and TV Shows sections
 export async function scanLibrary(req, res) {
   try {
-    const urls = [
-      `http://${PLEX_HOST}:${PLEX_PORT}/library/sections/1/refresh?X-Plex-Token=${PLEX_TOKEN}`,
-      `http://${PLEX_HOST}:${PLEX_PORT}/library/sections/2/refresh?X-Plex-Token=${PLEX_TOKEN}`
-    ];
-    await Promise.all(urls.map(url => axios.get(url)));
-    res.json({ success: true });
+    const url = `http://${PLEX_HOST}:${PLEX_PORT}/library/sections/1/refresh?X-Plex-Token=${PLEX_TOKEN}`;
+    const response = await axios.get(url, {
+      headers: {
+        'X-Plex-Client-Identifier': 'magnetFluxCoordinator'
+      }
+    });
+    res.json({ success: true, data: response.data });
   } catch (err) {
     console.error('Plex scan error:', err.response?.status, err.response?.data);
     res.status(500).json({ success: false, message: err.message, details: err.response?.data });
