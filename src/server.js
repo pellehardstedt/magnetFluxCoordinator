@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Now import other modules
 import express from 'express';
 import session from 'express-session';
 import path from 'path';
@@ -10,6 +11,8 @@ import cors from 'cors';
 import torrentRoutes from './routes/torrentRoutes.js';
 import plexRoutes from './routes/plexRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import plexService from './services/plexService.js';
+import fileUtils from './utils/fileUtils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
