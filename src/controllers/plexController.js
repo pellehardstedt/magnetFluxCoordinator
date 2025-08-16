@@ -4,6 +4,8 @@ const PLEX_TOKEN = process.env.PLEX_TOKEN;
 const PLEX_HOST = process.env.PLEX_HOST || 'localhost';
 const PLEX_PORT = process.env.PLEX_PORT || 32400;
 
+console.log('Using Plex token:', PLEX_TOKEN);
+
 // Scan both Movies and TV Shows sections
 export async function scanLibrary(req, res) {
   try {
