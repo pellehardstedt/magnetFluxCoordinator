@@ -4,6 +4,7 @@ import { EventEmitter } from 'events';
 import fs from 'fs';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import plexService from './plexService.js';
 dotenv.config();
 
 
