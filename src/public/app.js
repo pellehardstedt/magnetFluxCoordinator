@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const clearLogBtn = document.getElementById('clearLog');
   const toggleThemeBtn = document.getElementById('toggleTheme');
   const body = document.body;
+  const torrentType = document.getElementById('torrentType');
+  const torrentUrlInput = document.getElementById('torrentUrl');
 
   // Always show the main app
   main.style.display = '';
@@ -21,6 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
       body.classList.add('dark-mode');
     }
   });
+
+  function formatSpeed(bytesPerSec) {
+    if (bytesPerSec >= 1024 * 1024) {
+      return (bytesPerSec / (1024 * 1024)).toFixed(2) + ' MB/s';
+    } else if (bytesPerSec >= 1024) {
+      return (bytesPerSec / 1024).toFixed(2) + ' KB/s';
+    } else {
+      return bytesPerSec + ' B/s';
+    }
+  }
 
   function addLog(message, type = 'info') {
     const entry = document.createElement('div');
@@ -40,9 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
         torrentList.innerHTML = '';
         data.torrents.forEach(t => {
           const li = document.createElement('li');
-          li.textContent = `${t.name} - ${Math.round(t.progress * 100)}% - ${t.done ? 'Done' : 'Downloading'}`;
+          li.textContent =
+            `${t.name} - ${Math.round(t.progress * 100)}% - ${t.done ? 'Done' : 'Downloading'} | ` +
+            `Speed: ${formatSpeed(t.currentSpeed)} (current), ${formatSpeed(t.averageSpeed)} (avg 2min)`;
           torrentList.appendChild(li);
-          addLog(`Torrent: ${t.name}, Progress: ${Math.round(t.progress * 100)}%, Status: ${t.done ? 'Done' : 'Downloading'}`, 'progress');
+          addLog(
+            `Torrent: ${t.name}, Progress: ${Math.round(t.progress * 100)}%, Status: ${t.done ? 'Done' : 'Downloading'}, ` +
+            `Speed: ${formatSpeed(t.currentSpeed)} (current), ${formatSpeed(t.averageSpeed)} (avg 2min)`,
+            'progress'
+          );
         });
       } else {
         addLog(`Failed to fetch torrent list. Status: ${res.status}`, 'error');
@@ -58,13 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   torrentForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const url = document.getElementById('torrentUrl').value;
+    const url = torrentUrlInput.value;
+    const type = torrentType.value;
     addLog(`Attempting to add torrent: ${url}`, 'info');
     try {
       const res = await fetch('/api/torrents/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, type }),
       });
       if (res.ok) {
         addLog('Torrent added successfully.', 'success');
@@ -100,5 +119,15 @@ document.addEventListener('DOMContentLoaded', () => {
   clearLogBtn.addEventListener('click', () => {
     logView.innerHTML = '';
     addLog('Log cleared.', 'info');
+  });
+
+  // Optional: Suggest type based on input
+  torrentUrlInput.addEventListener('input', () => {
+    const value = torrentUrlInput.value;
+    if (/S\d{1,2}E\d{1,2}/i.test(value)) {
+      torrentType.value = 'tv';
+    } else {
+      torrentType.value = 'movie';
+    }
   });
 });

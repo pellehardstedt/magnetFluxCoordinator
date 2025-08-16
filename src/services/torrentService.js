@@ -2,6 +2,7 @@ import WebTorrent from 'webtorrent';
 import path from 'path';
 import { EventEmitter } from 'events';
 import fs from 'fs';
+import axios from 'axios';
 
 const client = new WebTorrent();
 const downloads = [];
@@ -9,6 +10,12 @@ const emitter = new EventEmitter();
 
 const DOWNLOAD_PATH = process.env.DOWNLOAD_PATH || path.join(process.cwd(), 'downloads');
 const TORRENTS_FILE = path.join(process.cwd(), 'torrents.json');
+
+// Add this after your other imports
+const SPEED_HISTORY_INTERVAL = 2000; // ms
+const SPEED_HISTORY_LENGTH = 60; // 2 minutes (60 * 2s = 120s)
+
+const speedHistoryMap = new Map(); // infoHash -> [{timestamp, speed}]
 
 // Load persisted torrents on startup
 function loadPersistedTorrents() {
@@ -58,12 +65,128 @@ function cleanupDownloadFolder(persistedIds) {
   });
 }
 
-function addTorrent(torrentId) {
+function parseTvInfo(torrentName) {
+  // Example: "South.Park.S27E01.1080p.WEB.H264-SuccessfulCrab"
+  const regex = /^(.*?)\.S(\d{1,2})E(\d{1,2})/i;
+  const match = torrentName.replace(/ /g, '.').match(regex);
+  if (match) {
+    const title = match[1].replace(/\./g, ' ');
+    const season = parseInt(match[2], 10);
+    return { title, season };
+  }
+  return null;
+}
+
+function getDestinationPath(torrent, type) {
+  if (type === 'tv') {
+    const info = parseTvInfo(torrent.name);
+    if (info) {
+      // Example: /path/to/plex/tv/South Park/Season 27/
+      return path.join(process.env.PLEX_LIBRARY_PATH, 'tv', info.title, `Season ${info.season}`);
+    }
+    // Fallback if parsing fails
+    return path.join(process.env.PLEX_LIBRARY_PATH, 'tv', torrent.name);
+  } else {
+    // Movie
+    return path.join(process.env.PLEX_LIBRARY_PATH, 'movies');
+  }
+}
+
+function isMediaOrSubtitle(filename) {
+  // Accept common video and subtitle extensions
+  return /\.(mp4|mkv|avi|mov|wmv|flv|webm|srt)$/i.test(filename);
+}
+
+function moveToPlex(torrent, type) {
+  const destDir = getDestinationPath(torrent, type);
+  if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+  torrent.files.forEach(file => {
+    if (isMediaOrSubtitle(file.name)) {
+      const dest = path.join(destDir, file.name);
+      fs.renameSync(file.path, dest);
+      console.log(`Moved ${file.path} to ${dest}`);
+    } else {
+      // Optionally, delete or ignore other files
+      console.log(`Skipped non-media file: ${file.name}`);
+    }
+  });
+}
+
+async function checkInRecentlyAdded(torrentName) {
+  const PLEX_TOKEN = process.env.PLEX_TOKEN;
+  const PLEX_HOST = process.env.PLEX_HOST || 'localhost';
+  const PLEX_PORT = process.env.PLEX_PORT || 32400;
+  const url = `http://${PLEX_HOST}:${PLEX_PORT}/library/recentlyAdded?X-Plex-Token=${PLEX_TOKEN}`;
+  try {
+    const response = await axios.get(url);
+    // Simple string check for the torrent name in the XML response
+    return response.data.includes(torrentName);
+  } catch (err) {
+    console.error('Error checking Plex recently added:', err.message);
+    return false;
+  }
+}
+
+function moveToPlexAndScan(torrent, type) {
+  moveToPlex(torrent, type);
+  // Scan Plex library
+  plexService.triggerScan().then(async () => {
+    // Wait a few seconds for Plex to update
+    setTimeout(async () => {
+      const found = await checkInRecentlyAdded(torrent.name);
+      if (found) {
+        console.log(`✅ "${torrent.name}" found in Plex recently added!`);
+      } else {
+        console.warn(`⚠️ "${torrent.name}" NOT found in Plex recently added.`);
+      }
+    }, 5000); // Wait 5 seconds before checking
+  });
+}
+
+// Track download speed of torrents
+function trackSpeed(torrent) {
+  if (!speedHistoryMap.has(torrent.infoHash)) {
+    speedHistoryMap.set(torrent.infoHash, []);
+  }
+  setInterval(() => {
+    const now = Date.now();
+    const speed = torrent.downloadSpeed; // bytes/sec
+    const history = speedHistoryMap.get(torrent.infoHash);
+    history.push({ timestamp: now, speed });
+    // Keep only last 2 minutes
+    while (history.length > SPEED_HISTORY_LENGTH) {
+      history.shift();
+    }
+    speedHistoryMap.set(torrent.infoHash, history);
+  }, SPEED_HISTORY_INTERVAL);
+}
+
+function getCurrentSpeed(infoHash) {
+  const history = speedHistoryMap.get(infoHash);
+  if (history && history.length > 0) {
+    return history[history.length - 1].speed;
+  }
+  return 0;
+}
+
+function getAverageSpeed(infoHash) {
+  const history = speedHistoryMap.get(infoHash);
+  if (history && history.length > 0) {
+    const sum = history.reduce((acc, entry) => acc + entry.speed, 0);
+    return Math.round(sum / history.length);
+  }
+  return 0;
+}
+
+// Update addTorrent to use moveToPlexAndScan
+function addTorrent(torrentId, type = 'movie') {
   return new Promise((resolve, reject) => {
     client.add(torrentId, { path: DOWNLOAD_PATH }, torrent => {
       downloads.push(torrent);
       persistTorrents();
+      trackSpeed(torrent);
       torrent.on('done', () => {
+        moveToPlexAndScan(torrent, type);
         emitter.emit('done', torrent);
       });
       resolve({
@@ -75,12 +198,15 @@ function addTorrent(torrentId) {
   });
 }
 
+// Update listTorrents to include speed info
 function listTorrents() {
   return downloads.map(t => ({
     name: t.name,
     progress: t.progress,
     done: t.done,
     infoHash: t.infoHash,
+    currentSpeed: getCurrentSpeed(t.infoHash), // bytes/sec
+    averageSpeed: getAverageSpeed(t.infoHash), // bytes/sec
   }));
 }
 

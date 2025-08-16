@@ -21,7 +21,5 @@
     "downloader",
     "web"
   ],
-  "author": "Your Name",
-  "license": "MIT",
   "type": "module"
 }

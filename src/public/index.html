@@ -10,6 +10,10 @@
   <button id="toggleTheme" type="button" style="margin-bottom: 1em;">Toggle Light/Dark Mode</button>
   <div id="main">
     <form id="torrentForm">
+      <select id="torrentType">
+        <option value="movie">Movie</option>
+        <option value="tv">TV Series</option>
+      </select>
       <input type="text" id="torrentUrl" placeholder="Magnet, .torrent, or page URL" required />
       <button type="submit">Add Torrent</button>
     </form>
