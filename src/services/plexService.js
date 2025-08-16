@@ -8,9 +8,17 @@ const PLEX_PORT = process.env.PLEX_PORT || 32400;
 const PLEX_LIBRARY_PATH = process.env.PLEX_LIBRARY_PATH;
 
 async function triggerScan() {
-  // Triggers a Plex library scan via HTTP API
-  const url = `http://${PLEX_HOST}:${PLEX_PORT}/library/sections/all/refresh?X-Plex-Token=${PLEX_TOKEN}`;
-  await axios.get(url);
+  const urls = [
+    `http://${PLEX_HOST}:${PLEX_PORT}/library/sections/1/refresh?X-Plex-Token=${PLEX_TOKEN}`,
+    `http://${PLEX_HOST}:${PLEX_PORT}/library/sections/2/refresh?X-Plex-Token=${PLEX_TOKEN}`
+  ];
+  await Promise.all(urls.map(url =>
+    axios.get(url, {
+      headers: {
+        'X-Plex-Client-Identifier': 'magnetFluxCoordinator'
+      }
+    })
+  ));
 }
 
 function moveToPlex(torrent, type) {
