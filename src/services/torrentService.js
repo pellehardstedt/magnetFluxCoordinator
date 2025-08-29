@@ -14,6 +14,8 @@ const __dirname = path.dirname(__filename);
 // Always load .env from the project root
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+process.env.AXIOS_HTTP_ADAPTER = 'http';
+
 const client = new WebTorrent();
 const downloads = [];
 const emitter = new EventEmitter();
