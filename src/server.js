@@ -47,13 +47,3 @@ app.listen(PORT, () => {
 // await plexService.triggerScan();
 // plexService.moveToPlex(torrent, type);
 
-document.getElementById('add').onclick = async () => {
-  const magnet = document.getElementById('magnet').value;
-  const res = await fetch('http://YOUR_SERVER_IP:PORT/api/torrents', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ magnet })
-  });
-  const data = await res.json();
-  document.getElementById('status').textContent = data.success ? 'Added!' : 'Error';
-};
