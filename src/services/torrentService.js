@@ -2,6 +2,7 @@ import WebTorrent from 'webtorrent';
 import path from 'path';
 import { EventEmitter } from 'events';
 import fs from 'fs';
+process.env.AXIOS_HTTP_ADAPTER = 'http';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import plexService from './plexService.js';
@@ -14,7 +15,6 @@ const __dirname = path.dirname(__filename);
 // Always load .env from the project root
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-process.env.AXIOS_HTTP_ADAPTER = 'http';
 
 const client = new WebTorrent();
 const downloads = [];
