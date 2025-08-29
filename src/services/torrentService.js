@@ -5,8 +5,14 @@ import fs from 'fs';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import plexService from './plexService.js';
-dotenv.config();
+import { fileURLToPath } from 'url';
 
+// Ensure __dirname is set for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Always load .env from the project root
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const client = new WebTorrent();
 const downloads = [];
@@ -73,7 +79,6 @@ function cleanupDownloadFolder(persistedIds) {
 }
 
 function parseTvInfo(torrentName) {
-  // Example: "South.Park.S27E01.1080p.WEB.H264-SuccessfulCrab"
   const regex = /^(.*?)\.S(\d{1,2})E(\d{1,2})/i;
   const match = torrentName.replace(/ /g, '.').match(regex);
   if (match) {
@@ -88,13 +93,11 @@ function getDestinationPath(torrent, type) {
   if (type === 'tv') {
     const info = parseTvInfo(torrent.name);
     if (info) {
-      // Example: /plexmediaserver/Library/tvseries/South Park/Season 27/
       return path.join(process.env.PLEX_LIBRARY_PATH, 'tvseries', info.title, `Season ${info.season}`);
     }
     // Fallback if parsing fails
     return path.join(process.env.PLEX_LIBRARY_PATH, 'tvseries', torrent.name);
   } else {
-    // Movie: /plexmediaserver/Library/video/
     return path.join(process.env.PLEX_LIBRARY_PATH, 'video');
   }
 }
